@@ -1,0 +1,49 @@
+name: Automated tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Choose target
+        required: true
+        default: all
+        type: choice
+        options:
+          - api_test
+          - ui_test
+          - all
+
+ 
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12.1"
+
+      - name: Install Chrome
+        run: sudo apt-get install google-chrome-stable
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: API tests
+        if: "github.event.inputs.deployment_target == 'api_test'"
+        run: pytest tests/api/
+        continue-on-error: true
+
+      - name: UI tests
+        if: "github.event.inputs.deployment_target == 'ui_test'"
+        run: pytest tests/ui/
+        continue-on-error: true
+
+      - name: All
+        if: "github.event.inputs.deployment_target == 'all'"
+        run: pytest
+        continue-on-error: true
