@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 /allure-result
+/.pytest_cache
