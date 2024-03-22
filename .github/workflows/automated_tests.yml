@@ -9,41 +9,83 @@ on:
         default: all
         type: choice
         options:
-          - api_test
-          - ui_test
+          - something
+          - users
           - all
 
- 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  tests:
+  test:
     runs-on: ubuntu-latest
+    needs: download-history
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Setup Python
+      - name: setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-
       - name: Install Chrome
         run: sudo apt-get install google-chrome-stable
-
-      - name: Install dependencies
+      - name: install dependencies
         run: pip install -r requirements.txt
-
-      - name: API tests
-        if: "github.event.inputs.deployment_target == 'api_test'"
-        run: pytest tests/api/
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v3
+      - name: something
+        if: "github.event.inputs.deployment_target == 'something'"
+        run: pytest tests/something/* --alluredir=allure-results
         continue-on-error: true
-
-      - name: UI tests
-        if: "github.event.inputs.deployment_target == 'ui_test'"
-        run: pytest tests/ui/
+      - name: users
+        if: "github.event.inputs.deployment_target == 'users'"
+        run: pytest tests/users/* --alluredir=allure-results
         continue-on-error: true
-
-      - name: All
+      - name: all
         if: "github.event.inputs.deployment_target == 'all'"
-        run: pytest
+        run: pytest --alluredir=allure-results
         continue-on-error: true
+      - name: Store allure results
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path:
+            allure-results
+          retention-days: 1
+  
+  generate-report:
+    runs-on: ubuntu-latest
+    needs: test
+    name: Generate report
+    steps:
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+      - run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.23.1/allure-2.23.1.tgz && sudo tar -zxvf allure-2.23.1.tgz -C /opt/ && sudo ln -s /opt/allure-2.23.1/bin/allure /usr/bin/allure
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v3
+      - run: allure generate -c allure-results -o _site
+      - name: Store generated report
+        uses: actions/upload-artifact@v3
+        with:
+          name: _site
+          path:
+            _site
+          retention-days: 1
+
+  publish-report:
+    runs-on: ubuntu-latest
+    needs: generate-report
+    name: Report publication
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1.2.9
