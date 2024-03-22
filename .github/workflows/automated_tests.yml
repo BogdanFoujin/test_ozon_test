@@ -41,9 +41,9 @@ jobs:
         if: "github.event.inputs.deployment_target == 'production'"
         run: pytest -k production --alluredir=allure-results
         continue-on-error: true
-      - name: deployment
-        if: "github.event.inputs.deployment_target == 'deployment'"
-        run: pytest -k deployment --alluredir=allure-results
+      - name: development
+        if: "github.event.inputs.deployment_target == 'development'"
+        run: pytest -k development --alluredir=allure-results
         continue-on-error: true
       - name: all
         if: "github.event.inputs.deployment_target == 'all'"
