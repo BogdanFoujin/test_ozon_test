@@ -37,13 +37,13 @@ jobs:
         run: pip install -r requirements.txt
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v3
-      - name: something
-        if: "github.event.inputs.deployment_target == 'something'"
-        run: pytest tests/something/* --alluredir=allure-results
+      - name: production
+        if: "github.event.inputs.deployment_target == 'production'"
+        run: pytest -k production --alluredir=allure-results
         continue-on-error: true
-      - name: users
-        if: "github.event.inputs.deployment_target == 'users'"
-        run: pytest tests/users/* --alluredir=allure-results
+      - name: deployment
+        if: "github.event.inputs.deployment_target == 'deployment'"
+        run: pytest -k deployment --alluredir=allure-results
         continue-on-error: true
       - name: all
         if: "github.event.inputs.deployment_target == 'all'"
