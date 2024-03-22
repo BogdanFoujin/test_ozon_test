@@ -9,8 +9,8 @@ on:
         default: all
         type: choice
         options:
-          - something
-          - users
+          - production
+          - development
           - all
 
 permissions:
