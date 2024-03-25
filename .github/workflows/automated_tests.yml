@@ -66,6 +66,7 @@ jobs:
   
   test:
     runs-on: ubuntu-latest
+    name: Test
     needs: download-history
 
     steps:
