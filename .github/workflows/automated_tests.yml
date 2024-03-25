@@ -62,11 +62,11 @@ jobs:
           name: allure-results
           path:
             allure-results
-          retention-days: 1
   
   test:
     runs-on: ubuntu-latest
     name: Test
+    needs: download-history
 
     steps:
       - name: Checkout repository
