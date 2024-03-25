@@ -67,7 +67,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Test
-    needs: download-history
 
     steps:
       - name: Checkout repository
@@ -100,7 +99,6 @@ jobs:
           name: allure-results
           path:
             allure-results
-          retention-days: 1
   
   generate-report:
     runs-on: ubuntu-latest
@@ -121,7 +119,6 @@ jobs:
           name: _site
           path:
             _site
-          retention-days: 1
 
   publish-report:
     runs-on: ubuntu-latest
